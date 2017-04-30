@@ -25,55 +25,48 @@ int main(int argc, char **argv){
 	printf(" *********************** Testing Smithy Card  ***********************\n\n");
 
 	//Variables
-	struct gameState game;
-	memset(&game, 'z', sizeof(struct gameState));  //clearing out struct
+	struct gameState gameBefore, gameAfter;
 	int k[10] = {adventurer, gardens, embargo, village, minion, mine, cutpurse,
 			sea_hag, tribute, smithy};
-	int randNum, result, discardBefore, discardAfter, handCountBefore, handCountAfter, 
-		error = 0;
+	int randNum, result, error = 0;
 	randNum = rand()%123;
 
-	result = initializeGame(2, k, randNum, &game);
+	result = initializeGame(2, k, randNum, &gameBefore);
 	if(result != 0){
 		printf("Fail:\tInitializing game returned non-zero value.\n\n");
 		exit(1);
 	}
+	result = initializeGame(2, k, randNum, &gameAfter);
 	//Setting random card in hand to smithy
 	randNum = rand()%5;
-	game.hand[0][randNum] = k[9];
-
-	//Getting discard number before
-	discardBefore = game.discardCount[0];
-	
-	//Getting hand count before playing Smithy
-	handCountBefore = game.handCount[0];
+	gameBefore.hand[0][randNum] = k[9];
+	gameAfter.hand[0][randNum] = k[9];
 	
 	//Playing Smithy
-	result = playSmithy(&game, randNum);
+	result = playSmithy(&gameAfter, randNum);
 	if(result != 0){
 		printf("Fail:\tPlaying Smithy should return value of zero.\n\n");
 		error = 1;
 	}		
-	discardAfter = game.discardCount[0];
-	handCountAfter = game.handCount[0];
-	//There should be one discard card
-	if(discardAfter != (discardBefore + 1)){ 
-		printf("Fail:\tThere should one discard card after playing Smithy (the Smithy card itself.)\n\n");
+	//There should be one playedCard
+	if(gameAfter.playedCardCount != 1){ 
+		printf("Fail:\tThere should one played card.\n\n");
 		error = 1; 
-	//There is one discard card and checking if it is Smithy
-	}else{ 
-		if(game.discard[0][discardBefore + 1] != k[9]){
-			printf("Fail:\tThe discard card should be Smithy.\n\n");
-			error = 1;
-		}
+	//The is played card should be a Smithy
+	}else if(gameAfter.playedCards[0] != smithy){
+		printf("Fail:\tPlayed card should be a Smithy.\n\n");
+		error = 1;
 	}
-	
 	//The hand should gain a net of 2 cards (+3 cards, - 1 Smithy)
-	if(handCountAfter != (handCountBefore + 2)){
+	if(gameAfter.handCount[0] != (gameBefore.handCount[0] + 2)){
 		printf("Fail:\tHand count should net 2 cards (+3 cards, -1 Smithy).\n\n");
 		error = 1;
 	}
-
+	//The number of actions should be decremented
+	if(gameAfter.numActions != (gameBefore.numActions - 1)){
+		printf("Fail:\tNumber of actions should have decreased by 1.\n\n");
+		error = 1;
+	}
 	if(!error){
 		printf("Success:\t Smithy passes tests.\n\n");
 	}
