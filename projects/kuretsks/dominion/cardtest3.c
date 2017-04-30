@@ -2,8 +2,6 @@
 #include <stdio.h>
 #include "dominion.h"
 #include "rngs.h"
-#include "interface.h"
-
 
 /*	This unit test is designed to test the Village card. 
  *
@@ -46,8 +44,7 @@ int main(int argc, char **argv){
 		printf("Fail:\tVillage should add 2 actions.\n\n");
 		error = 1;
 	}
-	printHand(0, &gameBefore);
-	printHand(0, &gameAfter);
+
 	// Hand Count
 	if(gameAfter.handCount[0] != (gameBefore.handCount[0])){
 		printf("Fail:\tVillage should have a zero net gain to hand count (+1 card, -1 Village).\n\n");
