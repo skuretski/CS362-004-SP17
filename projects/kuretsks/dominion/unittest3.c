@@ -30,7 +30,7 @@
 void clearVictoryCards(struct gameState *game, int k[]);
 
 int main(int argv, char **argc){
-	printf("************************ Testing scoreFor() Function *************************\n\n");
+	printf("\n\n####################################### TESTING SCOREFOR() FUNCTION ############################################################## \n\n");
 
 	//Variables
 	struct gameState game;
@@ -73,7 +73,6 @@ int main(int argv, char **argc){
 		printf("\tPass\n\n");
 	}
 	
-	
 	//Test Case 3
 	printf("Testing Case 3 (1 Estate hand, 1 Curse discard, 1 Curse deck)...\n\n");
 	clearVictoryCards(&game, k);
@@ -87,12 +86,12 @@ int main(int argv, char **argc){
 		printf("\tFail:\tResult does not equal expected score of %d.\n\n\n", scoreExpected);
 		error = 1;
 	}else{
-		printf("Pass.\n\n");
+		printf("\tPass.\n\n");
 	}	
 	if(!error){
-		printf("SCOREFOR() PASSED ALL TESTS\n\n");
+		printf("SCOREFOR TESTS PASSED.\n\n");
 	}
-	printf("*************************** scoreFor() Tests Completed **********************************\n\n");
+	printf("\n\n####################################### END SCOREFOR FUNCTION TESTS ############################################################## \n\n");
 	return 0;
 }
 

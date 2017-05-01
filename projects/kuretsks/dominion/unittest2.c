@@ -18,7 +18,7 @@
  */ 
 
 int main(int argc, char **argv){
-	printf("************************* Testing numHandCards() Function ************************************\n\n");
+	printf("\n\n####################################### TESTING numHandCards FUNCTION ############################################################## \n\n");
 	
 	//Variables
 	struct gameState game;
@@ -33,18 +33,22 @@ int main(int argc, char **argv){
 		exit(1);
 	}
 	
+	//Getting hand card numbers from function and struct
 	handCardFunc = numHandCards(&game);
 	handCardStruct = game.handCount[0];
 
+	printf("Testing numHandCards Return Value...\n\n");
 	if(handCardFunc != handCardStruct){
-		printf("Fail:\tNumber of hand cards from function should equal the number of hand cards from the struct.\n\n");
+		printf("\tFail:\tNumber of hand cards from function should equal the number of hand cards from the struct.\n\n");
 		error = 1;
+	} else{
+		printf("\tPass.\n\n");
 	}
 	
 	//Printing Results
 	if(!error){
-		printf("numHandCards() PASSED ALL TESTS.\n\n");
+		printf("numHandCards() TESTS PASSED.\n\n");
 	}
-	printf("****************************** numHandCards() Tests Completed ************************************\n\n");
+	printf("\n\n####################################### END numHandCard FUNCTION TESTS ############################################################## \n\n");
 	return 0;
 }

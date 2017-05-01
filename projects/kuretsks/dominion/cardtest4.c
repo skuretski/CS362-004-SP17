@@ -22,64 +22,86 @@
  */
 
 int main(int argc, char **argv){
-	printf("********************************* Testing Great Hall ***************************************\n\n");
+	printf("\n\n####################################### TESTING GREAT HALL ############################################################## \n\n");
 
 	//Variables
 	struct gameState gameBefore, gameAfter;
 	int randNum, result, scoreBefore, scoreAfter, error = 0;
 	int k[10] = {adventurer, gardens, embargo, village, minion, mine,
 		cutpurse, sea_hag, tribute, great_hall};
+
+	//Initializing Game
 	randNum = rand()%123;
 	result = initializeGame(2, k, randNum, &gameBefore);
 	if(result != 0){
 		printf("Fail:\tInitialize game should return zero.\n\n");
 		exit(1);
 	}
-	//Setting sixth card in hand as great_hall 
+	
+	//Getting scoreBefore gaining great_hall
 	scoreBefore = scoreFor(0, &gameBefore);
-	printf("Score Before: %d\n", scoreBefore);
+
+	//Setting sixth card in hand as great_hall 
 	gameBefore.hand[0][5] = great_hall;
 	gameBefore.handCount[0] = 6;
+
+	//Shallow copy of gameBefore to gameAfter
 	gameAfter = gameBefore;
+
+	//Playing Great Hall
 	result = cardEffect(great_hall, -1,-1,-1, &gameAfter, 5, 0);
 	if(result != 0){
 		printf("Fail:\tCard Effect should return zero.\n\n");
 		error = 1;
 	}
 	//Actions
+	printf("Testing Number of Actions...\n\n");
 	if(gameAfter.numActions != (gameBefore.numActions + 1)){
-		printf("Fail:\tNumber of actions should have increased by 1.\n\n");
+		printf("\tFail:\tNumber of actions should have increased by 1.\n\n");
 		error = 1;
+	} else{
+		printf("\tPass.\n\n");
 	}
 	//Hand Count
+	printf("Testing Hand Count...\n\n");
 	if(gameAfter.handCount[0] != gameBefore.handCount[0]){
-		printf("Fail:\tHand count should net zero cards (+1 card, -1 Great Hall).\n\n");
+		printf("\tFail:\tHand count should net zero cards (+1 card, -1 Great Hall).\n\n");
 		error = 1;
 	}
 	else if(gameAfter.hand[0][gameAfter.handCount[0] - 1] == great_hall){
-		printf("Fail:\tGreat Hall should not be in hand after playing.\n\n");
+		printf("\tFail:\tGreat Hall should not be in hand after playing.\n\n");
 		error = 1;
+	} else{
+		printf("\tPass.\n\n");
 	}
 
 	//Played Cards
+	printf("Testing Played Cards...\n\n");
 	if(gameAfter.playedCardCount != (gameBefore.playedCardCount + 1)){
-		printf("Fail:\tPlayed card count should have increased by 1 (Great Hall was played).\n\n");
+		printf("\tFail:\tPlayed card count should have increased by 1 (Great Hall was played).\n\n");
 		error = 1;
 	}
 	else if(gameAfter.playedCards[gameAfter.playedCardCount - 1] != great_hall){
-		printf("Fail:\tLast played card should be Great Hall.\n\n");
+		printf("\tFail:\tLast played card should be Great Hall.\n\n");
 		error = 1;
+	} else{
+		printf("\tPass.\n\n");
 	}
 
 	//Victory Points
+	printf("Testing Victory Points...\n\n");
+
+	//Getting Score after having Great Hall
 	scoreAfter = scoreFor(0, &gameAfter);
 	if((scoreBefore + 1) != scoreAfter){
-		printf("Fail:\tGreat Hall did not add 1 Victory Point.\n\n");
+		printf("\tFail:\tGreat Hall did not add 1 Victory Point.\n\n");
 		error = 1;
+	} else{
+		printf("\tPass.\n\n");
 	}
 	if(!error){
-		printf("GREAT HALL PASSED ALL TESTS.\n\n");
+		printf("GREAT HALL TESTS PASSED.\n\n");
 	}
-	printf("************************** End of Great Hall Tests ************************************\n\n");
+	printf("\n\n####################################### END GREAT HALL TESTS ############################################################## \n\n");
 	return 0;
 } 

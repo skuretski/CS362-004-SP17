@@ -39,7 +39,7 @@
  */ 
 
 int main(int argv, char **argc){
-	printf("\n\n******************** Testing Function isGameOver() ****************************\n\n");
+	printf("\n\n####################################### TESTING isGameOver() FUNCTION ############################################################## \n\n");
 	
 	//Variables
 	struct gameState game;
@@ -56,7 +56,7 @@ int main(int argv, char **argc){
 	}
 	
 	//Test Case 1 (No Provinces)
-	printf("Test Case 1 (No Provinces)\n\n");
+	printf("Test Case 1 (No Provinces)...\n\n");
 	game.supplyCount[province] = 0;
 	expectedOver = 1;
 	resultedOver = isGameOver(&game);
@@ -68,7 +68,7 @@ int main(int argv, char **argc){
 	}
 
 	//Test Case 2 (3 Empty Supply Piles)
-	printf("Test Case 2 (3 Empty Supply Piles)\n\n");
+	printf("Test Case 2 (3 Empty Supply Piles)...\n\n");
 	
 	//Resetting Province count to not zero and 3 kingdom cards to zero
 	game.supplyCount[province] = 5;
@@ -85,7 +85,7 @@ int main(int argv, char **argc){
 	}
 	
 	//Test Case 3 (Supply has no empty piles and Provinces are not empty)
-	printf("Test Case 3 (No empty supply and Provinces are not empty)\n\n");
+	printf("Test Case 3 (No empty supply and Provinces are not empty)...\n\n");
 	game.supplyCount[province] = 5;
 	game.supplyCount[smithy] = 1;
 	game.supplyCount[village] = 1;
@@ -101,9 +101,9 @@ int main(int argv, char **argc){
 
 	//Final Prints
 	if(!error){
-		printf("ISGAMEOVER() PASSED ALL TESTS.\n\n");
+		printf("ISGAMEOVER() TESTS PASSED.\n\n");
 	}
-	printf("******************************** isGameOver() Tests Completed ***********************************\n\n");
+	printf("\n\n####################################### END isGameOver() FUNCTION TESTS ############################################################## \n\n");
 	return 0;
 }
 
