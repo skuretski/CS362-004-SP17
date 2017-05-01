@@ -55,7 +55,7 @@ unit4:
 
 mytests: card1 card2 card3 card4 unit1 unit2 unit3 unit4
 
-unittestresults: 
+unittestresults.out: 
 	echo "----------------------------- UNIT TESTS --------------------------" &> unittestresults.out
 	gcc -o unittest1 dominion.c rngs.c unittest1.c -fprofile-arcs -ftest-coverage -std=c99 -lm -g
 	unittest1 >> unittestresults.out
