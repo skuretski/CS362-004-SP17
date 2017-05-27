@@ -54,7 +54,7 @@ enum CARD
    treasure_map
   };
 
-typedef struct gameState {
+struct gameState {
   int numPlayers; //number of players
   int supplyCount[treasure_map+1];  //this is the amount of a specific type of card given a specific number.
   int embargoTokens[treasure_map+1];
@@ -73,7 +73,7 @@ typedef struct gameState {
   int discardCount[MAX_PLAYERS];
   int playedCards[MAX_DECK];
   int playedCardCount;
-} gameState;
+};
 
 /* All functions return -1 on failure, and DO NOT CHANGE GAME STATE;
    unless specified for other return, return 0 on success */
@@ -130,11 +130,13 @@ int getWinners(int players[MAX_PLAYERS], struct gameState *state);
 /* Set array position of each player who won (remember ties!) to
    1, others to 0 */
 
-int playAdventurer(struct gameState *state, int handPos);
+int playAdventurer(struct gameState *state);
 int playSmithy(struct gameState *state, int handPos);
 int playVillage(struct gameState *state, int handPos);
 int playFeast(struct gameState *state, int choice1);
 int playCouncil_Room(struct gameState *state, int handPos);
-
-
+int useAdventurer(struct gameState *state, int drawntreasure, int currentPlayer, int cardDrawn, int temphand[MAX_HAND], int tmpCounter);
+int useVillage(struct gameState *state, int currentPlayer, int handPos);
+int useSmithy(struct gameState *state, int i, int currentPlayer, int handPos);
+int useGreat_Hall(struct gameState *state, int currentPlayer, int handPos);
 #endif

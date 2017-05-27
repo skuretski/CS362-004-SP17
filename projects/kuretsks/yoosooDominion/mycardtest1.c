@@ -3,8 +3,6 @@
 #include <string.h>
 #include "dominion.h"
 #include "rngs.h"
-#include "interface.h"
-
 /*	This unit test is designed to test the Adventurer card
  *	implementation.
  *
@@ -53,9 +51,13 @@ int main(int argc, char **argv){
 	gameBefore.hand[0][randNum] = adventurer;
 	gameAfter.hand[0][randNum] = adventurer;
 
-	//Playing Adventurer card
-	result = playAdventurer(&gameAfter, randNum);
+	int temphand[MAX_HAND];
+	int drawntreasure = 0;
+	int cardDrawn = 0;
+	int tempCounter = 0;
 
+	//Playing Adventurer Card
+	result = useAdventurer(&gameAfter, drawntreasure, gameAfter.whoseTurn, cardDrawn, temphand, tempCounter);
 	//playAdventurer should return zero
 	if(result != 0){
 		printf("Fail:\tplaying Adventurer card returned non-zero value.\n\n");
@@ -108,9 +110,13 @@ int main(int argc, char **argv){
 	gameBefore.handCount[0] = 1;
 	gameAfter = gameBefore;
 
+	int temphand2[MAX_HAND];
+	drawntreasure = 0;
+	cardDrawn = 0;
+	tempCounter = 0;
 
-	result = playAdventurer(&gameAfter, 0);
-
+	//Playing Adventurer Card
+	result = useAdventurer(&gameAfter, drawntreasure, gameAfter.whoseTurn, cardDrawn, temphand2, tempCounter);
 	// Discards
 	printf("\tTesting Discards...\n\n");
 	if(gameAfter.discardCount[0] != (gameBefore.discardCount[0] + 2)){
@@ -167,7 +173,13 @@ int main(int argc, char **argv){
 	gameBefore.handCount[0] = 1;
 	gameAfter = gameBefore;
 
-	result = playAdventurer(&gameAfter, 0);
+	int temphand3[MAX_HAND];
+	drawntreasure = 0;
+	cardDrawn = 0;
+	tempCounter = 0;
+
+	//Playing Adventurer Card
+	result = useAdventurer(&gameAfter, drawntreasure, gameAfter.whoseTurn, cardDrawn, temphand3, tempCounter);
 	// Discards
 	printf("\tTesting Discards...\n\n");
 	if(gameAfter.discardCount[0] != (gameBefore.discardCount[0] + 2)){
@@ -214,8 +226,13 @@ int main(int argc, char **argv){
 	gameBefore.handCount[0] = 1;
 	gameAfter = gameBefore;
 
-	result = playAdventurer(&gameAfter, 0);
+	int temphand4[MAX_HAND];
+	drawntreasure = 0;
+	tempCounter = 0;
+	cardDrawn = 0;
 
+	//Playing Adventurer Card
+	result = useAdventurer(&gameAfter, drawntreasure, gameAfter.whoseTurn, cardDrawn, temphand4, tempCounter);
 	// Discards
 	printf("\tTesting Discards...\n\n");
 	if(gameAfter.discardCount[0] != (gameBefore.discardCount[0] + 2)){
@@ -244,8 +261,8 @@ int main(int argc, char **argv){
 
 	// Deck Cards
 	printf("\tTesting Deck Cards...\n\n");
-	if(gameAfter.deckCount[0] != (gameBefore.deckCount[0] -3)){
-		printf("\t\tFail:\tRemaining deck count should be 3 less.\n\n");
+	if(gameAfter.deckCount[0] != (gameBefore.deckCount[0] -2)){
+		printf("\t\tFail:\tRemaining deck count should be 2 less.\n\n");
 		error = 1;
 	} else{
 		printf("\t\tPass.\n\n");

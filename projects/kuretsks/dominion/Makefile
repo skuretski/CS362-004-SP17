@@ -29,8 +29,8 @@ runtests: testDrawCard
 	gcov dominion.c >> unittestresult.out
 	cat dominion.c.gcov >> unittestresult.out
 
-card1: cardtest1.c dominion.o rngs.o
-	gcc -fprofile-arcs -ftest-coverage -std=c99 dominion.o rngs.o cardtest1.c -o cardtest1 -lm -g
+card1: cardtest1.c dominion.o rngs.o interface.o
+	gcc -fprofile-arcs -ftest-coverage -std=c99 interface.o dominion.o rngs.o cardtest1.c -o cardtest1 -lm -g
 
 card2: cardtest2.c dominion.o rngs.o
 	gcc -fprofile-arcs -ftest-coverage -std=c99 dominion.o rngs.o cardtest2.c -o cardtest2 -lm -g
@@ -83,8 +83,8 @@ player: player.c interface.o
 mytesthelper.o: mytesthelper.h mytesthelper.c rngs.o dominion.o
 	gcc -c mytesthelper.c $(CFLAGS)
 
-randadvcard: randomtestadventurer.c dominion.o rngs.o mytesthelper.o
-	gcc -o randadvcard -g randomtestadventurer.c dominion.o rngs.o mytesthelper.o -std=c99 -fprofile-arcs -ftest-coverage -lm
+randadvcard: randomtestadventurer.c dominion.o rngs.o mytesthelper.o interface.o
+	gcc -o randadvcard -g randomtestadventurer.c dominion.o rngs.o mytesthelper.o interface.o -std=c99 -fprofile-arcs -ftest-coverage -lm
 
 randtestcard2: randomtestcard2.c dominion.o rngs.o mytesthelper.o
 	gcc -o randtestcard2 -g randomtestcard2.c dominion.o rngs.o mytesthelper.o -std=c99 -fprofile-arcs -ftest-coverage -lm

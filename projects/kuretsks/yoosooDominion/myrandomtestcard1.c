@@ -1,12 +1,12 @@
 
-/* randomtestadventurer.c
+/* randomtestcard1.c (Smithy random test)
  *
  * Author: Susan Kuretski
  * CS362-400, Spring 2017
  * Assignment 4: Random Testers
  * May 8, 2017
  *
- * Description: This is a random tester for the Adventurer card. Randomized entities:
+ * Description: This is a random tester for the Smithy card. Randomized entities:
  * 	1. Initial Game State
  * 		a. Num of players (2-4) randomized.
  * 		b. Kingdom Cards (adventurer - treasure_map) randomized.
@@ -29,28 +29,30 @@
  * 		a. Number is randomized (min/max in mytesthelper.h)
  * 	7. PHASE IS ALWAYS SET TO ACTION
  *
- * 	The randomized state is set and then Adventurer is played.
+ * 	The randomized state is set and then Smithy is played.
  * 	The Oracle will check if the post-conditions are correct.
  * ***********************************************************************************
- * An Adventurer card should:
- *	1. Add 2 Treasure cards (gold, silver, or copper) to current player's hand.
- *		a. If 2 Treasure cards are not available for draw (deck + discard),
- *			then the maximum is drawn (1 or 0 treasure card(s)).
- *		b. Hand Count is increased by 2 (or what Treasure card is drawn).
- *		c. Hand is updated with Treasure cards.
- *	2. playAdventurer function does not consume an action. This is done in function
- *	   playCard() which is not under test here.
- *	3. Non-treasure cards drawn to get Treasure cards are put in the discard pile.
- *	4. playAdventurer should put Adventurer card into playedCards pile and
- *	   increase playedCardsCount by 1.
- *	5. Discard count is only affected by the cards drawn that are discarded.
- *		a. Adventurer card is not discarded yet. This is done in endTurn() which
- *		   is not under test here.
- *	6. Deck count should be decreased by the number of cards drawn and the deck pile
- *	   should place those cards into hand or discard, depending on type of card.
- *	7. State that should NOT change:
- *		numPlayers, supplyCount, embargoTokens, outpostPlayed, outpostTurn,
- *		whoseTurn, phase, numActions, coins, numBuys
+ * A Smithy card should:
+ * 	1. Add three cards to player's hand.
+ * 		a. If there are no draw cards from deck, then it is assumed
+ * 		the discard pile is shuffled to be the deck again.
+ * 		b. The three cards can be any type (Victory, Action, Treasure, etc).
+ * 		c. If there are less than 3 cards to be drawn, then the player draws
+ * 		max capable.
+ * 	2. Playing Smithy consumes one action.
+ * 		a. It should be noted an action is not consumed in the function
+ * 		cardEffect() function. It is done at playCard(), which is not tested here.
+ * 		b. Therefore, the number of actions will NOT be decremented in this test case.
+ * 	3. Playing Smithy puts Smithy in the playedCards pile and increments playedCardsCount
+ * 		by one.
+ * 		a. It *should* not put in discard until endTurn() (endTurn is not under test here).
+ * 	4. Playing Smithy should decrement handCount by one and remove it from hand pile.
+ * 		a. Playing Smithy should increment handCount by number of cards drawn.
+ * 	5. Playing Smithy should decrement deckCount by three (or what is drawn) and the
+ * 		card(s) from the deck should be placed into hand.
+ * 	5. State that should NOT change:
+ * 		numPlayers, supplyCount, embargoTokens,outpostPlayed, outpostTurn,
+ * 		whoseTurn, phase, numActions, coins, numBuys, discard, discardCount.
  */
 
 #include <assert.h>
@@ -59,84 +61,79 @@
 #include "mytesthelper.h"
 #include "dominion.h"
 #include "rngs.h"
-#include "interface.h"
 
-int check_playAdventurer(struct gameState *postState, int handPos){
+/*  --  Smithy Oracle --
+ *
+ * Description: takes in struct gameState postState which will use
+ * the function playSmithy. The postState will be compared to what
+ * the state should be (preState will contain this).
+ *
+ * Parameters:
+ * 	 - struct gameState to be tested
+ * 	 - int handPos indicating where Smithy is in hand
+ *
+ * Returns:
+ * 	int
+ * 		-1 indicates mismatch
+ * 		0 indicates no error
+ *
+ */
+int check_playSmithy(struct gameState *postState, int handPos){
     struct gameState preState;
     int curPlayer = postState->whoseTurn;
-
     memcpy(&preState, postState, sizeof(struct gameState));
-    int temphand[MAX_HAND];
-    //Calling playAdventurer Function
-    int r = playAdventurer(postState, handPos);
+
+    //Calling playSmithy Function
+    int i = 0;
+    int r = useSmithy(postState, i, curPlayer, handPos);
 
     //If the function flat out fails, return -1.
     if(r != 0){
-    	return -1;
+    	r = -1;
     }
     //Setting preState to what the postState should be
     else{
-    	int cardDrawn = 0, i = 0, treasureCount = 0, numTotalCards;
-    	numTotalCards = preState.deckCount[curPlayer] + preState.discardCount[curPlayer];
+    	int i;
     	//Played Card Count
     	preState.playedCardCount++;
-    	preState.playedCards[0] = adventurer;
+    	preState.playedCards[0] = smithy;
 
-    	//Drawing Cards until 2 Treasures
-    	while(treasureCount < 2 && i < numTotalCards){
+    	//Draw Cards
+    	for(i = 0; i < 3; i++){
     		drawOneCard(curPlayer, &preState);
-    		cardDrawn = preState.hand[curPlayer][preState.handCount[curPlayer] - 1];
-    		if(cardDrawn == copper || cardDrawn == silver || cardDrawn == gold){
-    			treasureCount++;
-    			numTotalCards--;
-    		} else{
-    			temphand[i] = cardDrawn;
-    			preState.handCount[curPlayer]--;
-    			i++;
-    		}
     	}
-    	while(i > 0){
-    		preState.discard[curPlayer][preState.discardCount[curPlayer]++] = temphand[i-1];
-    		i--;
-    	}
-    	//Taking Adventurer out of hand
+    	//Taking Smithy out of hand
     	preState.hand[curPlayer][handPos] = -1;
-    	if(!(handPos == (preState.handCount[curPlayer] - 1)) && !(preState.handCount[curPlayer] == 1)){
+    	if(!(handPos == (preState.handCount[curPlayer] - 1)) || !(preState.handCount[curPlayer] == 1)){
     		preState.hand[curPlayer][handPos] = preState.hand[curPlayer][(preState.handCount[curPlayer] - 1 )];
     		preState.hand[curPlayer][preState.handCount[curPlayer] -1 ] = -1;
     	}
     	//Decrementing Hand Count by one
     	preState.handCount[curPlayer]--;
 
-    	//Comparing oracle to postState (after Adventurer)
-        int preTotalCards = preState.deckCount[curPlayer] + preState.discardCount[curPlayer];
-        int postTotalCards = postState->deckCount[curPlayer] + postState->discardCount[curPlayer];
-
-        if(preState.handCount[curPlayer] != postState->handCount[curPlayer])
-        	r = -1;
-        else if(preTotalCards != postTotalCards)
-        	r = -1;
-        else if(memcmp(preState.playedCards, postState->playedCards, sizeof(int[MAX_DECK])) != 0)
+    	//Comparing oracle to postState (after Smithy)
+        if(memcmp(&preState, postState, sizeof(struct gameState)) != 0)
         	r = -1;
         else
         	r = 0;
     }
-	return r;
+    return r;
 }
 
 
-int main(){
+int main()
+{
     printf("**********************************************************************************************************\n");
-    printf("Initiate Random Testing [playAdventurer] function\n");
+    printf("Initiate Random Testing [useSmithy] function\n");
     SelectStream(SEED_STREAM);
     PutSeed(RANDOM_SEED);
     struct gameState rand_gameState, emptyStruct;
-    int advPosition;
+    int smithyPosition;
     printf("\nRandom Testing..");
     int trialNum;
     for (trialNum = 1; trialNum <= NUM_TRIALS; ++trialNum){
     	rand_gameState = emptyStruct;
-        initialize_rand_gameState(&rand_gameState, adventurer);
+        initialize_rand_gameState(&rand_gameState, smithy);
 
         // Randomize whose turn
         int rand_curPlayer = randomRange(0, rand_gameState.numPlayers - 1); // -1 because 0 indexed;
@@ -147,8 +144,8 @@ int main(){
         rand_gameState.handCount[rand_curPlayer] = rand_handsize;
         fill_with_random_cards(&rand_gameState, rand_gameState.hand[rand_curPlayer],rand_handsize);
 
-        // Putting in Adventurer in random place in hand if not there already
-        advPosition = putCardInRandomHandPlace(&rand_gameState, rand_gameState.hand[rand_curPlayer], rand_handsize, adventurer);
+        // Putting in Smithy in random place in hand if not there already
+        smithyPosition = putCardInRandomHandPlace(&rand_gameState, rand_gameState.hand[rand_curPlayer], rand_handsize, smithy);
 
         // Randomize player's deck
         int rand_decksize = randomRange(MIN_NUM_CARDS_IN_DECK, MAX_NUM_CARDS_IN_DECK);
@@ -169,7 +166,7 @@ int main(){
 
         // Evaluate Random Trial
         printf("\nRandom Trial #%d of %d:", trialNum, NUM_TRIALS);
-        printf("   %d", check_playAdventurer(&rand_gameState, advPosition));
+        printf("   %d", check_playSmithy(&rand_gameState, smithyPosition));
 
     }
 
@@ -179,7 +176,7 @@ int main(){
     for (decksize = 0; decksize < 5; ++decksize){
         for (discardsize = 0; discardsize < 5; ++discardsize){
         	rand_gameState = emptyStruct;
-            initialize_rand_gameState(&rand_gameState, adventurer);
+            initialize_rand_gameState(&rand_gameState, smithy);
 
             // Randomize whose turn
             int rand_curPlayer = randomRange(0, rand_gameState.numPlayers - 1); // -1 because 0 indexed;
@@ -190,8 +187,8 @@ int main(){
             rand_gameState.handCount[rand_curPlayer] = rand_handsize;
             fill_with_random_cards(&rand_gameState, rand_gameState.hand[rand_curPlayer],rand_handsize);
 
-            // Putting in Adventurer in random place in hand if not there already
-            advPosition = putCardInRandomHandPlace(&rand_gameState, rand_gameState.hand[rand_curPlayer], rand_handsize, adventurer);
+            // Putting in Smithy in random place in hand if not there already
+            smithyPosition = putCardInRandomHandPlace(&rand_gameState, rand_gameState.hand[rand_curPlayer], rand_handsize, smithy);
 
             // ITERATED deck size with random cards
             rand_gameState.deckCount[rand_curPlayer] = decksize;
@@ -210,13 +207,10 @@ int main(){
 
             // Evaluate Fixed Trial
             printf("\nFixed Trial #%d:", ++fixedTrialNum);
-            printf("   %d",check_playAdventurer(&rand_gameState, advPosition));
+            printf("   %d",check_playSmithy(&rand_gameState, smithyPosition));
         }
     }
-    printf("\n\nEnd of Random Testing [playAdventurer] function\n");
+    printf("\n\nEnd of Random Testing [useSmithy] function\n");
     printf("**********************************************************************************************************\n");
 	return 0;
-
-
 }
-

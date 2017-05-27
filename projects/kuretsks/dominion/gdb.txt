@@ -1,0 +1,83 @@
+Breakpoint 1 at 0x405e70: file dominion.c, line 1119.
+Temporary breakpoint 2 at 0x40142c: file randomtestadventurer.c, line 112.
+Starting program: /nfs/stak/students/k/kuretsks/cs362/CS362-004-SP17/projects/kuretsks/dominion/randadvcard 
+
+Temporary breakpoint 2, main () at randomtestadventurer.c:112
+112	    printf("**********************************************************************************************************\n");
+Missing separate debuginfos, use: debuginfo-install glibc-2.17-157.el7_3.2.x86_64
+113	    printf("Initiate Random Testing [playAdventurer] function\n");
+114	    SelectStream(SEED_STREAM);
+115	    PutSeed(RANDOM_SEED);
+118	    printf("\nRandom Testing..");
+120	    for (trialNum = 1; trialNum <= NUM_TRIALS; ++trialNum){
+121	    	rand_gameState = emptyStruct;
+122	        initialize_rand_gameState(&rand_gameState, adventurer);
+125	        int rand_curPlayer = randomRange(0, rand_gameState.numPlayers - 1); // -1 because 0 indexed;
+126	        rand_gameState.whoseTurn = rand_curPlayer;
+129	        int rand_handsize = randomRange(MIN_NUM_CARDS_IN_HAND, MAX_NUM_CARDS_IN_HAND);
+130	        rand_gameState.handCount[rand_curPlayer] = rand_handsize;
+131	        fill_with_random_cards(&rand_gameState, rand_gameState.hand[rand_curPlayer],rand_handsize);
+134	        advPosition = putCardInRandomHandPlace(&rand_gameState, rand_gameState.hand[rand_curPlayer], rand_handsize, adventurer);
+137	        int rand_decksize = randomRange(MIN_NUM_CARDS_IN_DECK, MAX_NUM_CARDS_IN_DECK);
+138	        rand_gameState.deckCount[rand_curPlayer] = rand_decksize;
+139	        fill_with_random_cards(&rand_gameState, rand_gameState.deck[rand_curPlayer], rand_decksize);
+142	        int rand_discardsize = randomRange(MIN_NUM_CARDS_IN_DISCARD, MAX_NUM_CARDS_IN_DISCARD);
+143	        rand_gameState.discardCount[rand_curPlayer] = rand_discardsize;
+144	        fill_with_random_cards(&rand_gameState, rand_gameState.discard[rand_curPlayer], rand_discardsize);
+147	        rand_gameState.numBuys = randomRange(MIN_NUM_BUYS, MAX_NUM_BUYS);
+148	        rand_gameState.numActions = randomRange(MIN_NUM_ACTIONS, MAX_NUM_ACTIONS);
+151	        rand_gameState.phase = 0; // Need action phase
+154	        printf("\nRandom Trial #%d of %d:", trialNum, NUM_TRIALS);
+155	        printf("   %d", check_playAdventurer(&rand_gameState, advPosition));
+check_playAdventurer (postState=0x7fffffff7920, handPos=0) at randomtestadventurer.c:66
+66	    int curPlayer = postState->whoseTurn;
+67	    memcpy(&preState, postState, sizeof(struct gameState));
+70	    int r = playAdventurer(postState);
+
+Breakpoint 1, playAdventurer (state=0x7fffffff7920) at dominion.c:1119
+1119		int drawnTreasure, cardDrawn, z = 0;
+$1 = 0
+$2 = 0
+1121		int currentPlayer = whoseTurn(state);
+whoseTurn (state=0x7fffffff7920) at dominion.c:348
+348	  return state->whoseTurn;
+349	}
+playAdventurer (state=0x7fffffff7920) at dominion.c:1122
+1122		while(drawnTreasure < 1){
+1124			if(state->deckCount[currentPlayer] < 1){	
+1127			drawCard(currentPlayer, state);
+1129			cardDrawn = state->hand[currentPlayer][state->handCount[currentPlayer]-1];	
+1130			if(cardDrawn == copper || cardDrawn == silver || cardDrawn == gold)
+1133				temphand[z] = cardDrawn;
+1135				state->handCount[currentPlayer]--; 
+1136				z++;
+1122		while(drawnTreasure < 1){
+$3 = 1
+Continuing.
+
+Program received signal SIGSEGV, Segmentation fault.
+0x0000000000406048 in playAdventurer (state=0x7fffffff7920) at dominion.c:1141
+1141			state->discard[currentPlayer][state->discardCount[currentPlayer]++] = temphand[z - 1]; 
+$4 = 21285
+$5 = {21, 0, 21, 8, 1, 22, 2, 0 <repeats 493 times>}
+$6 = {0 <repeats 240 times>, 1, 11, 0, 1, 0, -7952, 32767, 0, 1, 0, 0, -143410379, 32767, 0, 32, -7944, 32767, 0, 
+  1, 4199439, 0, 0, 0, -708919612, -1634155188, 4198352, 0, -7952, 32767, 0, 0, 0, 0, 369016516, 1634155187, 
+  -1604010300, 1634151339, 0, 32767, 0, 0, 0, 0, 4234320, 0, -7944, 32767, 1, 0, 0, 0, 0, 0, 4198352, 0, -7952, 
+  32767, 0, 0, 4198393, 0, -7960, 32767, 28, 0, 1, 0, -7173, 32767, 0, 0, -7083, 32767, -7069, 32767, -7052, 32767, 
+  -7017, 32767, -6908, 32767, -6878, 32767, -6862, 32767, -6827, 32767, -6773, 32767, -6753, 32767, -6742, 32767, 
+  -6718, 32767, -6693, 32767, -6666, 32767, -6645, 32767, -6613, 32767, -6591, 32767, -6576, 32767, -6563, 32767, 
+  -6547, 32767, -6539, 32767, -6457, 32767, -6442, 32767, -6410, 32767, -6384, 32767, -6348, 32767, -4912, 32767, 
+  -4900, 32767, -4887, 32767, -4826, 32767, -4809, 32767, -4774, 32767, -4743, 32767, -4684, 32767, -4669, 32767, 
+  -4654, 32767, -4598, 32767, -4535, 32767, -4474, 32767, -4419, 32767, -4391, 32767, -4367, 32767, -4335, 32767, 
+  -4307, 32767, -4296, 32767, -4288, 32767, -4241, 32767, -4230, 32767, -4215, 32767, -4206, 32767, 0, 0, 33, 0, 
+  -134242304, 32767, 16, 0, -1075053569, 0, 6, 0, 4096, 0, 17, 0, 100, 0, 3...}
+$7 = {4, 0, 24, 6, 2, 22, 1, 8, 21, 0, 21, 0 <repeats 489 times>}
+$8 = {7, 6, 1, 4, 4, 0 <repeats 495 times>}
+$9 = {0 <repeats 500 times>}
+$10 = 6
+$11 = 1
+A debugging session is active.
+
+	Inferior 1 [process 10385] will be killed.
+
+Quit anyway? (y or n) 

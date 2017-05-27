@@ -64,19 +64,18 @@
 int check_playAdventurer(struct gameState *postState, int handPos){
     struct gameState preState;
     int curPlayer = postState->whoseTurn;
-
     memcpy(&preState, postState, sizeof(struct gameState));
+    int drawntreasure = 0, cardDrawn = 0, tempCounter = 0;
     int temphand[MAX_HAND];
     //Calling playAdventurer Function
-    int r = playAdventurer(postState, handPos);
-
+    int r = useAdventurer(postState, drawntreasure, curPlayer, cardDrawn, temphand, tempCounter);
     //If the function flat out fails, return -1.
     if(r != 0){
-    	return -1;
+    	r = -1;
     }
     //Setting preState to what the postState should be
     else{
-    	int cardDrawn = 0, i = 0, treasureCount = 0, numTotalCards;
+    	int cardDrawn, i = 0, treasureCount = 0, numTotalCards;
     	numTotalCards = preState.deckCount[curPlayer] + preState.discardCount[curPlayer];
     	//Played Card Count
     	preState.playedCardCount++;
@@ -86,22 +85,13 @@ int check_playAdventurer(struct gameState *postState, int handPos){
     	while(treasureCount < 2 && i < numTotalCards){
     		drawOneCard(curPlayer, &preState);
     		cardDrawn = preState.hand[curPlayer][preState.handCount[curPlayer] - 1];
-    		if(cardDrawn == copper || cardDrawn == silver || cardDrawn == gold){
+    		if(cardDrawn == copper || cardDrawn == silver || cardDrawn == gold)
     			treasureCount++;
-    			numTotalCards--;
-    		} else{
-    			temphand[i] = cardDrawn;
-    			preState.handCount[curPlayer]--;
-    			i++;
-    		}
-    	}
-    	while(i > 0){
-    		preState.discard[curPlayer][preState.discardCount[curPlayer]++] = temphand[i-1];
-    		i--;
+    		i++;
     	}
     	//Taking Adventurer out of hand
     	preState.hand[curPlayer][handPos] = -1;
-    	if(!(handPos == (preState.handCount[curPlayer] - 1)) && !(preState.handCount[curPlayer] == 1)){
+    	if(!(handPos == (preState.handCount[curPlayer] - 1)) || !(preState.handCount[curPlayer] == 1)){
     		preState.hand[curPlayer][handPos] = preState.hand[curPlayer][(preState.handCount[curPlayer] - 1 )];
     		preState.hand[curPlayer][preState.handCount[curPlayer] -1 ] = -1;
     	}
@@ -109,14 +99,7 @@ int check_playAdventurer(struct gameState *postState, int handPos){
     	preState.handCount[curPlayer]--;
 
     	//Comparing oracle to postState (after Adventurer)
-        int preTotalCards = preState.deckCount[curPlayer] + preState.discardCount[curPlayer];
-        int postTotalCards = postState->deckCount[curPlayer] + postState->discardCount[curPlayer];
-
-        if(preState.handCount[curPlayer] != postState->handCount[curPlayer])
-        	r = -1;
-        else if(preTotalCards != postTotalCards)
-        	r = -1;
-        else if(memcmp(preState.playedCards, postState->playedCards, sizeof(int[MAX_DECK])) != 0)
+        if(memcmp(&preState, postState, sizeof(struct gameState)) != 0)
         	r = -1;
         else
         	r = 0;
@@ -127,7 +110,7 @@ int check_playAdventurer(struct gameState *postState, int handPos){
 
 int main(){
     printf("**********************************************************************************************************\n");
-    printf("Initiate Random Testing [playAdventurer] function\n");
+    printf("Initiate Random Testing [useAdventurer] function\n");
     SelectStream(SEED_STREAM);
     PutSeed(RANDOM_SEED);
     struct gameState rand_gameState, emptyStruct;
@@ -213,7 +196,7 @@ int main(){
             printf("   %d",check_playAdventurer(&rand_gameState, advPosition));
         }
     }
-    printf("\n\nEnd of Random Testing [playAdventurer] function\n");
+    printf("\n\nEnd of Random Testing [useAdventurer] function\n");
     printf("**********************************************************************************************************\n");
 	return 0;
 

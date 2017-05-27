@@ -1,0 +1,73 @@
+Bug Report
+
+Bug 1: Smithy Hand Count inaccurate 
+Class: Moderate
+Platform: Windows 10 Home x64
+Processor: Intel Core i7-4770K @ 3.5GHz
+IDE: Eclipse Luna 
+Files Involved: dominion.c., dominion.h, rngs.h, rngs.c
+
+Reproducible: Yes
+
+Description: Smithy does not net 2 cards to hand (+3 cards, -1 Smithy). 
+
+Steps to Produce/Reproduce:
+	Unit test: attempted with different hand configurations in game initialization. 
+	Random tests: attempted with different seeds and streams
+
+    Errors were prevalent throughout both tests. Hand counts were wrong when deck + discard > 4 cards. Errors did not occur in my fixed random testing where deck size + discard size <= 3. 
+
+Expected Results: Hand count should be 2 greater after playing Smithy (+3 cards to hand, -1 Smithy to played pile)
+
+Actual Results: Hand count is greater than 2. Smithy is in played pile.
+
+Symptoms: 
+•	Hand count is wrong for current player. 
+•	Hand contains extra cards. 
+
+Cause: 
+    for (i = 0; i < 4; i++) {
+        drawCard(currentPlayer, state);
+    }
+
+    For-loop should be i < 3 for 3 card draw. As it stands, this for-loop will draw 4 cards. 
+
+Potential Fix: 
+	Change for-loop to: 
+    for (i = 0; i < 3; i++) {
+        drawCard(currentPlayer, state);
+    }
+
+Notes: This is marked as moderate since the bug does not severely affect game play. Dominion does still run. However, it does provide the player with Smithy an unwarranted advantage and can produce an unpleasant game play experience. 
+
+-----------------------------------------------------------------------------------------------------------------
+Bug 2: Village action count inaccurate 
+Class: Moderate
+Platform: Windows 10 Home x64
+Processor: Intel Core i7-4770K @ 3.5GHz
+IDE: Eclipse Luna 
+Files Involved: dominion.c., dominion.h, rngs.h, rngs.c
+
+Reproducible: Yes
+
+Description: Village card does not add 2 actions
+
+Steps to Produce/Reproduce: 
+    The unit test for Village card and random testing was used. Unit test by default fails. I attempted other configurations with the initial gameState struct. However, the fail persists in the unit test. 
+
+    Random testing fails in all settings, including different seeds and streams. The fixed random testing also fails in all cases. 
+
+Expected Results: Village card should add 2 actions to current player’s number of actions. 
+
+Actual Results: Village does not add 2 actions to current player’s number of actions. 
+
+Symptoms: Current player has one less action than expected. 
+
+Cause: 
+  	state->numActions = state->numActions + 1;
+	This only adds one action to the current player’s number of actions. 
+
+Potential Fix:
+    state->numActions = state->numActions + 2;
+
+Notes: This is marked as moderate since the bug does not severely affect game play. Dominion still runs. However, it does not give the current player two actions. By shorting the player by one action, this can create an unpleasant game experience. 

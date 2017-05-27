@@ -1,12 +1,12 @@
 
-/* randomtestadventurer.c
+/* randomtestcard2.c  (Village Card Test)
  *
  * Author: Susan Kuretski
  * CS362-400, Spring 2017
  * Assignment 4: Random Testers
  * May 8, 2017
  *
- * Description: This is a random tester for the Adventurer card. Randomized entities:
+ * Description: This is a random tester for the Village card. Randomized entities:
  * 	1. Initial Game State
  * 		a. Num of players (2-4) randomized.
  * 		b. Kingdom Cards (adventurer - treasure_map) randomized.
@@ -29,28 +29,23 @@
  * 		a. Number is randomized (min/max in mytesthelper.h)
  * 	7. PHASE IS ALWAYS SET TO ACTION
  *
- * 	The randomized state is set and then Adventurer is played.
+ * 	The randomized state is set and then Village is played.
  * 	The Oracle will check if the post-conditions are correct.
  * ***********************************************************************************
- * An Adventurer card should:
- *	1. Add 2 Treasure cards (gold, silver, or copper) to current player's hand.
- *		a. If 2 Treasure cards are not available for draw (deck + discard),
- *			then the maximum is drawn (1 or 0 treasure card(s)).
- *		b. Hand Count is increased by 2 (or what Treasure card is drawn).
- *		c. Hand is updated with Treasure cards.
- *	2. playAdventurer function does not consume an action. This is done in function
+ * A Village card should:
+ *	1. playVillage function does not consume an action. This is done in function
  *	   playCard() which is not under test here.
- *	3. Non-treasure cards drawn to get Treasure cards are put in the discard pile.
- *	4. playAdventurer should put Adventurer card into playedCards pile and
+ *	2. playVillage should put Village card into playedCards pile and
  *	   increase playedCardsCount by 1.
- *	5. Discard count is only affected by the cards drawn that are discarded.
- *		a. Adventurer card is not discarded yet. This is done in endTurn() which
- *		   is not under test here.
- *	6. Deck count should be decreased by the number of cards drawn and the deck pile
- *	   should place those cards into hand or discard, depending on type of card.
- *	7. State that should NOT change:
- *		numPlayers, supplyCount, embargoTokens, outpostPlayed, outpostTurn,
- *		whoseTurn, phase, numActions, coins, numBuys
+ *	3. Number of actions should increase by 2.
+ *	4. Player should draw one card from deck and put into hand.
+ *		a. Hand Count is increased by 1.
+ *		b. Deck Count is decreased by 1.
+ *		c. Drawn card should be put into hand array and removed from deck
+ *			array
+ *	5. State that should NOT change:
+		Discard Count, Discard cards, whoseTurn, numPlayers, supplyCount, embargoToken,
+		outpostPlayed, outpostTurn, phase, coins, numBuys.
  */
 
 #include <assert.h>
@@ -59,64 +54,56 @@
 #include "mytesthelper.h"
 #include "dominion.h"
 #include "rngs.h"
-#include "interface.h"
 
-int check_playAdventurer(struct gameState *postState, int handPos){
+/* Description: playVillage oracle. This function will compare postState (the
+ * function which goes through playVillage function and what the state should be
+ * (preState struct).
+ *
+ * Parameters:
+ * 	- struct gameState *postState: the current game state to be tested
+ * 	- int handPos: the position in which Village is in
+ *
+ * Returns:
+ * 	-1 if pre/post mismatch
+ * 	0  if pre/post same state
+ *
+ */
+int check_playVillage(struct gameState *postState, int handPos){
     struct gameState preState;
     int curPlayer = postState->whoseTurn;
-
     memcpy(&preState, postState, sizeof(struct gameState));
-    int temphand[MAX_HAND];
-    //Calling playAdventurer Function
-    int r = playAdventurer(postState, handPos);
 
+    //Calling useVillage Function
+    int r = useVillage(postState, curPlayer, handPos);
     //If the function flat out fails, return -1.
     if(r != 0){
-    	return -1;
+    	r = -1;
     }
     //Setting preState to what the postState should be
     else{
-    	int cardDrawn = 0, i = 0, treasureCount = 0, numTotalCards;
-    	numTotalCards = preState.deckCount[curPlayer] + preState.discardCount[curPlayer];
+
     	//Played Card Count
     	preState.playedCardCount++;
-    	preState.playedCards[0] = adventurer;
+    	preState.playedCards[0] = village;
 
-    	//Drawing Cards until 2 Treasures
-    	while(treasureCount < 2 && i < numTotalCards){
-    		drawOneCard(curPlayer, &preState);
-    		cardDrawn = preState.hand[curPlayer][preState.handCount[curPlayer] - 1];
-    		if(cardDrawn == copper || cardDrawn == silver || cardDrawn == gold){
-    			treasureCount++;
-    			numTotalCards--;
-    		} else{
-    			temphand[i] = cardDrawn;
-    			preState.handCount[curPlayer]--;
-    			i++;
-    		}
-    	}
-    	while(i > 0){
-    		preState.discard[curPlayer][preState.discardCount[curPlayer]++] = temphand[i-1];
-    		i--;
-    	}
-    	//Taking Adventurer out of hand
+    	//Incrementing Actions by 2
+    	preState.numActions+=2;
+
+    	//Drawing one card
+    	drawOneCard(curPlayer, &preState);
+
+
+    	//Taking Village out of hand
     	preState.hand[curPlayer][handPos] = -1;
-    	if(!(handPos == (preState.handCount[curPlayer] - 1)) && !(preState.handCount[curPlayer] == 1)){
+    	if(!(handPos == (preState.handCount[curPlayer] - 1)) || !(preState.handCount[curPlayer] == 1)){
     		preState.hand[curPlayer][handPos] = preState.hand[curPlayer][(preState.handCount[curPlayer] - 1 )];
     		preState.hand[curPlayer][preState.handCount[curPlayer] -1 ] = -1;
     	}
     	//Decrementing Hand Count by one
     	preState.handCount[curPlayer]--;
 
-    	//Comparing oracle to postState (after Adventurer)
-        int preTotalCards = preState.deckCount[curPlayer] + preState.discardCount[curPlayer];
-        int postTotalCards = postState->deckCount[curPlayer] + postState->discardCount[curPlayer];
-
-        if(preState.handCount[curPlayer] != postState->handCount[curPlayer])
-        	r = -1;
-        else if(preTotalCards != postTotalCards)
-        	r = -1;
-        else if(memcmp(preState.playedCards, postState->playedCards, sizeof(int[MAX_DECK])) != 0)
+    	//Comparing oracle to postState (after Village)
+        if(memcmp(&preState, postState, sizeof(struct gameState)) != 0)
         	r = -1;
         else
         	r = 0;
@@ -124,19 +111,18 @@ int check_playAdventurer(struct gameState *postState, int handPos){
 	return r;
 }
 
-
 int main(){
     printf("**********************************************************************************************************\n");
-    printf("Initiate Random Testing [playAdventurer] function\n");
+    printf("Initiate Random Testing [useVillage] function\n");
     SelectStream(SEED_STREAM);
     PutSeed(RANDOM_SEED);
     struct gameState rand_gameState, emptyStruct;
-    int advPosition;
+    int villagePosition;
     printf("\nRandom Testing..");
     int trialNum;
     for (trialNum = 1; trialNum <= NUM_TRIALS; ++trialNum){
     	rand_gameState = emptyStruct;
-        initialize_rand_gameState(&rand_gameState, adventurer);
+        initialize_rand_gameState(&rand_gameState, village);
 
         // Randomize whose turn
         int rand_curPlayer = randomRange(0, rand_gameState.numPlayers - 1); // -1 because 0 indexed;
@@ -147,8 +133,8 @@ int main(){
         rand_gameState.handCount[rand_curPlayer] = rand_handsize;
         fill_with_random_cards(&rand_gameState, rand_gameState.hand[rand_curPlayer],rand_handsize);
 
-        // Putting in Adventurer in random place in hand if not there already
-        advPosition = putCardInRandomHandPlace(&rand_gameState, rand_gameState.hand[rand_curPlayer], rand_handsize, adventurer);
+        // Putting in Village in random place in hand if not there already
+        villagePosition = putCardInRandomHandPlace(&rand_gameState, rand_gameState.hand[rand_curPlayer], rand_handsize, village);
 
         // Randomize player's deck
         int rand_decksize = randomRange(MIN_NUM_CARDS_IN_DECK, MAX_NUM_CARDS_IN_DECK);
@@ -169,7 +155,7 @@ int main(){
 
         // Evaluate Random Trial
         printf("\nRandom Trial #%d of %d:", trialNum, NUM_TRIALS);
-        printf("   %d", check_playAdventurer(&rand_gameState, advPosition));
+        printf("   %d", check_playVillage(&rand_gameState, villagePosition));
 
     }
 
@@ -179,7 +165,7 @@ int main(){
     for (decksize = 0; decksize < 5; ++decksize){
         for (discardsize = 0; discardsize < 5; ++discardsize){
         	rand_gameState = emptyStruct;
-            initialize_rand_gameState(&rand_gameState, adventurer);
+            initialize_rand_gameState(&rand_gameState, village);
 
             // Randomize whose turn
             int rand_curPlayer = randomRange(0, rand_gameState.numPlayers - 1); // -1 because 0 indexed;
@@ -190,8 +176,8 @@ int main(){
             rand_gameState.handCount[rand_curPlayer] = rand_handsize;
             fill_with_random_cards(&rand_gameState, rand_gameState.hand[rand_curPlayer],rand_handsize);
 
-            // Putting in Adventurer in random place in hand if not there already
-            advPosition = putCardInRandomHandPlace(&rand_gameState, rand_gameState.hand[rand_curPlayer], rand_handsize, adventurer);
+            // Putting in Village in random place in hand if not there already
+            villagePosition = putCardInRandomHandPlace(&rand_gameState, rand_gameState.hand[rand_curPlayer], rand_handsize, village);
 
             // ITERATED deck size with random cards
             rand_gameState.deckCount[rand_curPlayer] = decksize;
@@ -210,13 +196,11 @@ int main(){
 
             // Evaluate Fixed Trial
             printf("\nFixed Trial #%d:", ++fixedTrialNum);
-            printf("   %d",check_playAdventurer(&rand_gameState, advPosition));
+            printf("   %d",check_playVillage(&rand_gameState, villagePosition));
         }
     }
-    printf("\n\nEnd of Random Testing [playAdventurer] function\n");
+    printf("\n\nEnd of Random Testing [useVillage] function\n");
     printf("**********************************************************************************************************\n");
 	return 0;
-
-
 }
 
