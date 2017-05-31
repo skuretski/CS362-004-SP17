@@ -58,6 +58,9 @@ public class UrlValidatorTest extends TestCase {
 	   printManualTest("http://www.amazon.com/value?color=blue", urlVal);
 	   printManualTest("http://something.com:1000", urlVal);
 	   printManualTest("http://11.11.11.11", urlVal);
+	   printManualTest("http://11.11.11.11:80", urlVal);
+	   
+	   
 	   
 	   System.out.println("\nShould be false\n");
 	   printManualTest("http:/www.amazon.com", urlVal);
@@ -68,16 +71,41 @@ public class UrlValidatorTest extends TestCase {
 	   printManualTest("http//www.amazon.com", urlVal);
 	   printManualTest("www.amazon.com", urlVal);
 	   printManualTest("amazon", urlVal);
+	   printManualTest("11.11.11.11", urlVal);
 	   
    }
    
-   
+   //First Partition Test: tests scheme i.e. http, https, etc.
    public void testYourFirstPartition()
    {
+	   System.out.println("--------------------------- Testing First Partition of Scheme --------------------------------");
+	   UrlValidator urlVal = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES);
+	   assertTrue(urlVal.isValid("http://www.yahoo.com"));
+	   assertTrue(urlVal.isValid("https://www.yahoo.com"));
+	   assertTrue(urlVal.isValid("http://255.255.255.255"));
+	   assertTrue(urlVal.isValid("ftp://11.11.11.11"));
+	   assertTrue(urlVal.isValid("sftp://11.11.11.11"));
+   }
+   
+   //Second Partition Test: tests authority i.e. google.com, www.something.com, 12.12.12.12
+   public void testYourSecondPartition(){
 	   
    }
    
-   public void testYourSecondPartition(){
+   //Third Partition Test: tests port number i.e. :80, :3000
+   public void testYourThirdPartition(){
+	   
+   }
+   
+   //Fourth Partition Test: tests path i.e. /path1, /somepath/somemorepath
+   public void testYourFourthPartition(){
+	   
+	   
+   }
+   
+   //Fifth Partition Test: tests query parameters i.e. ?key=value
+   public void testYourFifthPartition(){
+	   
 	   
    }
    
@@ -101,5 +129,31 @@ public class UrlValidatorTest extends TestCase {
     * @param testObjects Used to create a url.
     */
    
+   ResultPair [] testScheme = {
+       new ResultPair("http://", true),
+       new ResultPair("https://", true),
+       new ResultPair("ftp://", true),
+       new ResultPair("//", false),
+       new ResultPair(":/", false),
+       new ResultPair("", true),
+       new ResultPair("http", false)
+
+   };
+   
+   ResultPair [] testAuthority = {
+		 
+   };
+   
+   ResultPair [] testPort = {
+		   
+   };
+   
+   ResultPair [] testPath = {
+		   
+   };
+   
+   ResultPair [] testQuery = {
+		   
+   };
 
 }
