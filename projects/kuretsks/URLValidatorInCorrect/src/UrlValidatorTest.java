@@ -25,7 +25,7 @@ import junit.framework.TestCase;
  */
 public class UrlValidatorTest extends TestCase {
 
-   private boolean printStatus = true;
+   private boolean printStatus = false;
    private boolean printIndex = false;//print index that indicates current scheme,host,port,path, query test were using.
 
    public UrlValidatorTest(String testName) {
@@ -217,13 +217,97 @@ public class UrlValidatorTest extends TestCase {
    
    //Fourth Partition Test: tests path i.e. /path1, /somepath/somemorepath
    public void testYourFourthPartition(){
-	   
+	   if(printStatus)System.out.println("\n--------------------------- Testing Fourth Partition of PATH ----------------------------\n");
+	   UrlValidator urlVal = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES);
+	   String[] truePaths = {"/folder1", "/_32", "/()", "/folder1/folder2/folder3/folder4/folder5"};
+	   String[] falsePaths = {"//path", "/../", null, " ", "/path///", "path"};
+	   String formatError = "%-20s%s%s%n";
+	   String formatSuccess = "%-20s%s%n";
+	   for(int i = 0; i < truePaths.length; i++){
+		   boolean success = false;
+		   try{
+			   assertTrue(urlVal.isValidPath(truePaths[i]));
+			   success = true;
+		   } catch(AssertionError e){
+			   if(printStatus){
+				   System.out.printf(formatError, "\tFAIL:", truePaths[i], "\tERROR: Caught exception - assertion fail");
+			   }
+			   
+		   } finally{
+			   if(success && printStatus){
+				   System.out.printf(formatSuccess, "\tPASS: ", truePaths[i]);
+			   }
+		   }	   
+	   }
+	   for(int i = 0; i < falsePaths.length; i++){
+		   boolean success = false;
+		   try{
+			   assertFalse(urlVal.isValidPath(falsePaths[i]));
+			   success = true;
+		   } catch(AssertionError e){
+			   if(printStatus){
+				   System.out.printf(formatError, "\tFAIL:", falsePaths[i], "\tERROR: Caught exception - assertion fail");
+			   }		   
+		   } finally {
+			   if(success && printStatus)
+				   System.out.printf(formatSuccess,"\tPASS: ", falsePaths[i]);
+		   }
+	   }
+	   // ** These must run again to trigger pass/fail in JUnit since the errors are caught and handled above.
+	   for(int i = 0; i < truePaths.length; i++){
+		   assertTrue(urlVal.isValidPath(truePaths[i]));
+	   }
+	   for(int i = 0; i < falsePaths.length; i++){
+		   assertFalse(urlVal.isValidPath(falsePaths[i]));
+	   }
 	   
    }
    
    //Fifth Partition Test: tests query parameters i.e. ?key=value
    public void testYourFifthPartition(){
-	   
+	   if(printStatus)System.out.println("\n--------------------------- Testing Fifth Partition of QUERY ----------------------------\n");
+	   UrlValidator urlVal = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES);
+	   String[] trueQuery = {"?color=blue", "?color=blue&size=small", "?color=blue&size=sm&material=cotton"};
+	   String[] falseQuery = {"color=blue", "??", "??mode=1", "color", "#value"};
+	   String formatError = "%-20s%s%s%n";
+	   String formatSuccess = "%-20s%s%n";
+	   for(int i = 0; i < trueQuery.length; i++){
+		   boolean success = false;
+		   try{
+			   assertTrue(urlVal.isValidQuery(trueQuery[i]));
+			   success = true;
+		   } catch(AssertionError e){
+			   if(printStatus){
+				   System.out.printf(formatError, "\tFAIL:", trueQuery[i], "\tERROR: Caught exception - assertion fail");
+			   }
+			   
+		   } finally{
+			   if(success && printStatus){
+				   System.out.printf(formatSuccess, "\tPASS: ", trueQuery[i]);
+			   }
+		   }	   
+	   }
+	   for(int i = 0; i < falseQuery.length; i++){
+		   boolean success = false;
+		   try{
+			   assertFalse(urlVal.isValidQuery(falseQuery[i]));
+			   success = true;
+		   } catch(AssertionError e){
+			   if(printStatus){
+				   System.out.printf(formatError, "\tFAIL:", falseQuery[i], "\tERROR: Caught exception - assertion fail");
+			   }		   
+		   } finally {
+			   if(success && printStatus)
+				   System.out.printf(formatSuccess,"\tPASS: ", falseQuery[i]);
+		   }
+	   }
+	   // ** These must run again to trigger pass/fail in JUnit since the errors are caught and handled above.
+	   for(int i = 0; i < trueQuery.length; i++){
+		   assertTrue(urlVal.isValidQuery(trueQuery[i]));
+	   }
+	   for(int i = 0; i < falseQuery.length; i++){
+		   assertFalse(urlVal.isValidQuery(falseQuery[i]));
+	   }
 	   
    }
    
@@ -236,10 +320,6 @@ public class UrlValidatorTest extends TestCase {
 	   }
    }
    
-   public void testAnyOtherUnitTest()
-   {
-	   
-   }
    /**
     * Create set of tests by taking the testUrlXXX arrays and
     * running through all possible permutations of their combinations.
@@ -254,24 +334,50 @@ public class UrlValidatorTest extends TestCase {
        new ResultPair("//", false),
        new ResultPair(":/", false),
        new ResultPair("", true),
-       new ResultPair("http", false),
-       new ResultPair("sftp://", true)
+       new ResultPair("http", false)
    };
    
    ResultPair [] testAuthority = {
-		 
+	 new ResultPair("1.1.1.1", true),
+	 new ResultPair("256.256.256.256", false),
+	 new ResultPair("www.google.com", true),
+	 new ResultPair("ww.google.com", false),
+	 new ResultPair("oregonstate.edu", true),
+	 new ResultPair("google.c", false),
+	 new ResultPair("0.0.0.0", true),
+	 new ResultPair("255.255.255.255", true),
+	 new ResultPair("go.com", true),
+	 new ResultPair("google.comm", false)
    };
    
    ResultPair [] testPort = {
-		   
+	 new ResultPair(":1", true),
+	 new ResultPair(":80", true),
+	 new ResultPair("", true),
+	 new ResultPair(":3000", true),
+	 new ResultPair(":0", true),
+	 new ResultPair(":49f", false),
+	 new ResultPair("-1", false),
+	 new ResultPair(":65535", true)
    };
    
    ResultPair [] testPath = {
-		   
+	 new ResultPair("/folder1", true),
+	 new ResultPair("/folder1/folder2/folder3/folder4", true),
+	 new ResultPair("//folder1", false),
+	 new ResultPair("folder", false),
+	 new ResultPair("/__/", true),
+	 new ResultPair("/..", false),
+	 new ResultPair("/2334", true),
+	 new ResultPair("/folder1//folder2", false)
    };
    
    ResultPair [] testQuery = {
-		   
+	 new ResultPair("?color=red", true),
+	 new ResultPair("", true),
+	 new ResultPair("?color=red&size=small", true),
+	 new ResultPair("color=red", false),
+	 new ResultPair("?size=1", true)
    };
 
 }
